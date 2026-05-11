@@ -1,0 +1,18 @@
+[DEFAULT]
+target_columns=
+
+[mattermost]
+bot_token=<Your Mattermost Bot Token>
+host=<Mattermost Host>
+scheme=http
+port=8065
+
+[kanboard]
+url=<Your Kanboard URL>
+token=<Kanboard Webhook Token>
+api_token=<Kanboard API Token>
+
+プロジェクトごとの設定 (セクション名はプロジェクトID)
+[1]
+channel_id = <Mattermost Channel ID>
+target_columns = 1, 2, 3, 4

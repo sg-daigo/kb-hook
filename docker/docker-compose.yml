@@ -1,0 +1,14 @@
+services:
+  kb-hook:
+    image: kb-hook:1.0.0
+    container_name: kb-hook
+    ports:
+    - 3001:3001
+    volumes:
+      - ${PWD}/conf/config.ini:/app/conf/config.ini
+      - ${PWD}/conf/logging.ini:/app/conf/logging.ini
+    restart: unless-stopped
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+

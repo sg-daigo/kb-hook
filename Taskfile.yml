@@ -1,0 +1,26 @@
+version: '3'
+
+tasks:
+  default:
+    cmds:
+      - task: down
+      - task: up
+      - task: logs
+  build:
+    cmds:
+      - docker compose -f docker/docker-compose.yml build
+  up:
+    cmds:
+      - docker compose -f docker/docker-compose.yml up -d
+  down:
+    cmds:
+      - docker compose -f docker/docker-compose.yml down
+  logs:
+    cmds:
+      - docker compose -f docker/docker-compose.yml logs -f
+  ps:
+    cmds:
+      - docker compose -f docker/docker-compose.yml ps
+  sh:
+    cmds:
+      - docker compose -f docker/docker-compose.yml exec kb-hook /bin/bash
