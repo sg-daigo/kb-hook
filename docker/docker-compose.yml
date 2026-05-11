@@ -1,6 +1,6 @@
 services:
   kb-hook:
-    image: kb-hook:1.0.0
+    image: kb-hook:1.1.0
     container_name: kb-hook
     ports:
     - 3001:3001
