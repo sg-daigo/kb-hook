@@ -7,6 +7,7 @@ services:
     volumes:
       - ${PWD}/conf/config.ini:/app/conf/config.ini
       - ${PWD}/conf/logging.ini:/app/conf/logging.ini
+      - ${PWD}/conf/mention.yml:/app/conf/mention.yml
     restart: unless-stopped
     build:
       context: ..
