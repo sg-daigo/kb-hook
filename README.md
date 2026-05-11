@@ -19,8 +19,9 @@ Kanboard で発生したイベント（タスクの作成、およびカラム�
 
 ### 必要条件
 
-- Python 3.11+
+- Python 3.13
 - uv
+- go-task
 
 ### インストール
 
@@ -56,18 +57,17 @@ target_columns = 1, 2, 3, 4
 - `target_columns`: 通知対象とするカラム ID をカンマ区切りで指定します。
 - プロジェクトIDやカラムIDは、Kanboardの画面からは確認できないため、[ツール](https://github.com/sg-daigo/kb-tool.git)を用意しました。
 
-## 実行方法
-
-### ローカル実行
+## ビルド
 
 ```bash
-flask run --host=0.0.0.0 --port=3001
+task build
 ```
 
-### Docker での実行
+## 実行
 
 ```bash
-docker-compose -f docker/docker-compose.yml up -d
+task
+task logs
 ```
 
 ## Kanboard 側の設定
@@ -100,7 +100,8 @@ kb-hook/
 │   ├── config.ini        # メイン設定
 │   └── logging.ini       # ログ設定
 ├── templates/            # メッセージテンプレート
-└── docker/               # Docker関連ファイル
+├── docker/               # Docker関連ファイル
+└── Taskfile.yml          # taskファイル
 ```
 
 ## トラブルシューティング

@@ -5,7 +5,6 @@ tasks:
     cmds:
       - task: down
       - task: up
-      - task: logs
   build:
     cmds:
       - docker compose -f docker/docker-compose.yml build

@@ -1,3 +1,5 @@
+import configparser
+
 from flask import render_template
 import kanboard
 
@@ -13,10 +15,13 @@ def init(config, logger):
 
     # 設定ファイルよりtarget_columns要素を集約してリスト化
     for section in config.sections():
-        columns = config.get(section, "target_columns")
-        for col in columns.split(","):
-            if len(col) != 0:
-                g_target_columns.append(int(col))
+        try:
+            columns = config.get(section, "target_columns")
+            for col in columns.split(","):
+                if len(col) != 0:
+                    g_target_columns.append(int(col))
+        except configparser.NoOptionError:
+            pass
     logger.debug(g_target_columns)
 
     # Kanboard APIによりユーザー一覧とカラム一覧を取得
