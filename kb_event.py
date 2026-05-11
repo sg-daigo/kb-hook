@@ -1,8 +1,9 @@
+import os
 import configparser
 
 from flask import render_template
 import kanboard
-
+import yaml
 
 g_columns = {}
 g_users = {}
@@ -39,6 +40,18 @@ def init(config, logger):
     logger.info(g_columns)
 
 
+# 設定ファイルよりメンション対象ユーザー一覧を取得
+def get_mention_users(config) -> dict:
+    mention_users = {}
+    mention_file = os.path.join(config.get("DEFAULT", "conf_path"), 'mention.yml')
+    if os.path.exists(mention_file):
+        with open(mention_file, 'r', encoding='utf-8') as f:
+            mention_users = yaml.safe_load(f)
+
+    return mention_users
+
+
+# 指定されたプロジェクトのカラム情報を取得
 def get_columns(kb, project_id, logger):
     result = {}
     for column in kb.get_columns(project_id=project_id):
@@ -48,6 +61,7 @@ def get_columns(kb, project_id, logger):
     return result
 
 
+# Kanboardに登録された全アクティブユーザを取得する
 def get_users(kb, logger):
     result = {}
     for user in kb.get_all_users():
@@ -66,6 +80,11 @@ def get_kb(config, logger):
     kb = kanboard.Client(url, 'jsonrpc', kb_conf["api_token"])
 
     return kb
+
+
+# Kanboardより指定されたユーザを取得する
+def get_user(kb, user_name):
+    return kb.get_user_by_name(username=user_name)
 
 
 # KanboardのイベントよりプロジェクトIDを取得する
@@ -101,9 +120,16 @@ def get_reference_id(config, param, logger) -> str:
 
     return result
 
+
+# Kanboardのタスクからタグ情報を取得する
+def get_task_tags(kb, task_id):
+    return kb.get_task_tags(task_id=task_id)
+
+
 # イベント毎のつぶやきを生成する。
 def create_msg(config, param, logger):
     msg = ""
+    kb = get_kb(config, logger)
 
     # Kanboardのイベントを取得
     event_name = param["event_name"]
@@ -112,13 +138,32 @@ def create_msg(config, param, logger):
     if event_name == "task.create" or event_name == "task.move.project":
         msg = task_create_msg(config, param, logger)
     elif event_name == "task.move.column":
-        msg = task_move_column_msg(config, param, logger)
+        msg = task_move_column_msg(config, param, logger, kb)
+
+    if msg != "":
+        mention = ""
+        # タスクに紐付くタグを取得
+        task_id = int(param["event_data"]["task"]["id"])
+        tags = get_task_tags(kb, task_id)
+        if len(tags) != 0:
+            # タグが存在する場合、メンションを作成
+            logger.debug(f"tags: {tags}")
+            mention_users = get_mention_users(config)
+            for tag in tags:
+                tag_id = int(tag)
+                if tag_id in mention_users:
+                    if len(mention) != 0:
+                        mention += " "
+                    mention += f"@{mention_users[tag_id]}"
+        msg = f"{mention}\n{msg}"
+
+    logger.debug(msg)
 
     return msg
 
 
+# タスク生成イベント受信
 def task_create_msg(config, param, logger):
-    # タスク生成イベント受信
     task = param["event_data"]["task"]
     data = {
         "creator_name": task["creator_name"],
@@ -134,7 +179,8 @@ def task_create_msg(config, param, logger):
     return msg
 
 
-def task_move_column_msg(config, param, logger):
+# カラム移動イベント受信
+def task_move_column_msg(config, param, logger, kb):
     msg = ""
 
     event_author = param["event_author"]
