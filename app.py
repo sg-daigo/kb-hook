@@ -22,6 +22,7 @@ conf_file = os.path.join(conf_path, 'config.ini')
 with open(conf_file, "r") as f:
     logger.debug(f.readlines())
 config.read(conf_file, 'UTF-8')
+config.set('DEFAULT', 'conf_path', conf_path)
 
 kb_event.init(config, logger)
 app = Flask(__name__)
